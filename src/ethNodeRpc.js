@@ -59,7 +59,7 @@ const apiEndpoints = {
     for (let i = 0; i < endpoints.length; ++i) {
       const [response, error] = await runWithTimeout(
         globals.requestTimeout,
-        fetch(endpoints[i], payload),
+        () => fetch(endpoints[i], payload),
       )
       if (response && response.status === 200) {
         return response
@@ -72,9 +72,9 @@ const apiEndpoints = {
   },
 }
 
-function runWithTimeout(timeout, callback) {
+function runWithTimeout(timeout, task) {
   return Promise.race([
-    callback,
+    task(),
     new Promise((_, reject) =>
       setTimeout(() => reject(new Error('Timeout Exceeded')), timeout),
     ),
