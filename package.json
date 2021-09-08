@@ -7,6 +7,7 @@
   "scripts": {
     "format": "prettier --write '**/*.{js,css,json,md}'",
     "build": "esbuild ./src/index.js --bundle --outfile=./dist/worker.js --platform=node",
+    "build-standalone": "esbuild ./src/standalone.js --bundle --outfile=./dist/standalone.js --platform=node",
     "test": "export NODE_ENV=test && nyc mocha"
   },
   "author": "Bogdan Kovtun <psirex48@gmail.com>",
@@ -32,6 +33,7 @@
   },
   "dependencies": {
     "@ethersproject/abi": "^5.4.0",
+    "axios": "^0.21.4",
     "bignumber.js": "^9.0.1",
     "jsonrpc-lite": "^2.2.0"
   }

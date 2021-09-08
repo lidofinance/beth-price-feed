@@ -2,6 +2,8 @@ import jsonrpc from 'jsonrpc-lite'
 import { log } from './sentry'
 import { globals } from './globals'
 
+import axios from 'axios'
+
 /**
   Makes eth_call JSON RPC request to ethereum etnode.
   To make method more robust can use multiple JSON RPC nodes.
@@ -11,33 +13,19 @@ import { globals } from './globals'
   @returns result of eth call.
  */
 export async function ethCall(params) {
-  const response = await apiEndpoints.makeRequest({
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(jsonrpc.request(1, 'eth_call', params)),
-  })
-  const { result, error } = await response.json()
-  if (error) {
-    throw new EthCallError(params, error)
-  }
-  return result
+  return apiEndpoints
+    .makeRequest(jsonrpc.request(1, 'eth_call', params))
+    .catch(error => {
+      throw new EthCallError(params, error)
+    })
 }
 
 export async function ethBlockNumber() {
-  const response = await apiEndpoints.makeRequest({
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(jsonrpc.request(1, 'eth_blockNumber')),
-  })
-  const { result, error } = await response.json()
-  if (error) {
-    throw new EthCallError([], error)
-  }
-  return result
+  return apiEndpoints
+    .makeRequest(jsonrpc.request(1, 'eth_blockNumber'))
+    .catch(error => {
+      throw new EthCallError([], error)
+    })
 }
 
 /**
@@ -55,20 +43,44 @@ const apiEndpoints = {
   },
   async makeRequest(payload) {
     const endpoints = this.getEndpoints()
-    for (let i = 0; i < endpoints.length; ++i) {
-      const response = await fetch(endpoints[i], payload)
-      if (response.status === 200) {
-        return response
-      }
-      await log(
-        new ApiRequestError(
-          endpoints[i],
-          response.status,
-          await response.text(),
-        ),
-      )
-    }
-    throw new AllApiEndpointsFailedError()
+
+    /**
+     * create a thread of promises that executes the next promise only when one fails.
+     * if everything failes, response promise would remain rejected
+     *  */
+    return (
+      endpoints
+        .reduce(
+          (thread, endpoint) =>
+            thread.catch(async () => {
+              return axios
+                .post(endpoint, JSON.stringify(payload), {
+                  timeout: globals.requestTimeout,
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                })
+                .then(res => {
+                  const { result } = res.data
+                  if (result) {
+                    return result
+                  } else {
+                    throw new Error('no result')
+                  }
+                })
+                .catch(async error => {
+                  await log(new ApiRequestError(endpoints, error.status, error))
+                  return Promise.reject()
+                })
+            }),
+          Promise.reject(),
+        )
+
+        /* throw if still rejected */
+        .catch(() => {
+          throw new AllApiEndpointsFailedError()
+        })
+    )
   },
 }
 

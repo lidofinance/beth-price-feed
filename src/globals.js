@@ -7,6 +7,7 @@ export const globals = {
   ethRpcs: [],
   deviationBlockOffsets: [],
   bEthSafePriceValidator: new BEthSafePriceValidator(),
+  requestTimeout: 30000,
 }
 
 export function setGlobals({
@@ -19,6 +20,7 @@ export function setGlobals({
   bEthPriceLimits,
   stEthRateLimits,
   ethPriceLimits,
+  requestTimeout,
 }) {
   globals.env = env || globals.env
   globals.sentryProjectId = sentryProjectId || globals.sentryProjectId
@@ -33,4 +35,5 @@ export function setGlobals({
     stEthRate: stEthRateLimits,
     ethPrice: ethPriceLimits,
   })
+  globals.requestTimeout = requestTimeout || globals.requestTimeout
 }

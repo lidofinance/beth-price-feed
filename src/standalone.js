@@ -1,23 +1,33 @@
+/**
+ * standalone.js exposes bEthPriceSafe() function as a standalone function
+ * so it can be used as a function anywhere -- aside from cloudflare workers.
+ *
+ * All variables need to be injected via envvars
+ *
+ * Must not be used as an entry point.
+ */
+
 import { bEthPriceSafe } from './bEthPrice'
-import { handleJsonRpcRequests } from './JsonRpcRequestsHandler'
 import { setGlobals } from './globals'
 
-let ethRPCs = []
-// Before adding new encrypted env variable to cloudflare
-// wrangler compiles and deploys application. At this step
-// variable ETH_RPCS doesn't exists yet, so we have to have
-// try/catch block here to allow script to be compiled
-try {
-  ethRPCs = JSON.parse(ETH_RPCS)
-} catch (e) {
-  console.error(e)
-}
+var {
+  ENV,
+  SENTRY_PROJECT_ID,
+  SENTRY_KEY,
+  DEVIATION_BLOCK_OFFSETS,
+  BETH_RATE_LIMITS,
+  BETH_PRICE_LIMITS,
+  STETH_RATE_LIMITS,
+  ETH_PRICE_LIMITS,
+  ETH_RPCS,
+  REQUEST_TIMEOUT,
+} = process.env
 
 setGlobals({
   env: ENV,
   sentryProjectId: SENTRY_PROJECT_ID,
   sentryKey: SENTRY_KEY,
-  ethRpcs: ethRPCs,
+  ethRpcs: JSON.parse(ETH_RPCS),
   deviationBlockOffsets:
     DEVIATION_BLOCK_OFFSETS && JSON.parse(DEVIATION_BLOCK_OFFSETS),
   bEthRateLimits: BETH_RATE_LIMITS && JSON.parse(BETH_RATE_LIMITS),
@@ -27,8 +37,6 @@ setGlobals({
   requestTimeout: REQUEST_TIMEOUT && Number.parseInt(REQUEST_TIMEOUT, 10),
 })
 
-addEventListener('fetch', event => {
-  event.respondWith(
-    handleJsonRpcRequests(event.request, { currentPrice: bEthPriceSafe }),
-  )
-})
+export function getBethPriceSafeStandalone() {
+  return bEthPriceSafe()
+}
