@@ -22,6 +22,8 @@
     "BETH_RATE_LIMITS": "readonly",
     "BETH_PRICE_LIMITS": "readonly",
     "STETH_RATE_LIMITS": "readonly",
-    "ETH_PRICE_LIMITS": "readonly"
+    "ETH_PRICE_LIMITS": "readonly",
+    "REQUEST_TIMEOUT": "readonly",
+    "process": "readonly"
   }
 }

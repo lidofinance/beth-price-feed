@@ -42,7 +42,7 @@ export async function ethBlockNumber() {
 
 /**
  * Provides convenient interface to make request to list of nodes.
- * Takes API urls one by one and returns first successfull response.
+ * Takes API urls one by one and returns first successful response.
  * If some of requests fails will report error with information about fail to the Sentry.
  * If all requests fail throws AllApiEndpointsFailedError
  */
@@ -53,23 +53,34 @@ const apiEndpoints = {
     }
     return globals.ethRpcs
   },
+
   async makeRequest(payload) {
     const endpoints = this.getEndpoints()
     for (let i = 0; i < endpoints.length; ++i) {
-      const response = await fetch(endpoints[i], payload)
-      if (response.status === 200) {
+      const [response, error] = await runWithTimeout(
+        globals.requestTimeout,
+        () => fetch(endpoints[i], payload),
+      )
+      if (response && response.status === 200) {
         return response
       }
-      await log(
-        new ApiRequestError(
-          endpoints[i],
-          response.status,
-          await response.text(),
-        ),
-      )
+      const status = response && response.status
+      const text = response ? await response.text() : error.message
+      await log(new ApiRequestError(endpoints[i], status, text))
     }
     throw new AllApiEndpointsFailedError()
   },
+}
+
+function runWithTimeout(timeout, task) {
+  return Promise.race([
+    task(),
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout Exceeded')), timeout),
+    ),
+  ])
+    .then(response => [response, null])
+    .catch(error => [null, error])
 }
 
 class ApiRequestError extends Error {
