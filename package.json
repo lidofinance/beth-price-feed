@@ -33,7 +33,6 @@
   },
   "dependencies": {
     "@ethersproject/abi": "^5.4.0",
-    "axios": "^0.21.4",
     "bignumber.js": "^9.0.1",
     "jsonrpc-lite": "^2.2.0"
   }

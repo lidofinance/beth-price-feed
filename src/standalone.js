@@ -27,7 +27,7 @@ setGlobals({
   env: ENV,
   sentryProjectId: SENTRY_PROJECT_ID,
   sentryKey: SENTRY_KEY,
-  ethRpcs: JSON.parse(ETH_RPCS),
+  ethRpcs: JSON.parse(ETH_RPCS || '[]'),
   deviationBlockOffsets:
     DEVIATION_BLOCK_OFFSETS && JSON.parse(DEVIATION_BLOCK_OFFSETS),
   bEthRateLimits: BETH_RATE_LIMITS && JSON.parse(BETH_RATE_LIMITS),
