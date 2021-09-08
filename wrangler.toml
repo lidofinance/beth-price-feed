@@ -12,6 +12,7 @@ BETH_RATE_LIMITS = '{}'
 BETH_PRICE_LIMITS = '{"maxDeviations":[60,30,20]}'
 STETH_RATE_LIMITS = '{"maxDeviations":[5,1,0.5]}'
 ETH_PRICE_LIMITS = '{}'
+REQUEST_TIMEOUT = 10000
 
 
 [build]
@@ -36,6 +37,7 @@ BETH_RATE_LIMITS = '{}'
 BETH_PRICE_LIMITS = '{"maxDeviations":[60,30,20]}'
 STETH_RATE_LIMITS = '{"maxDeviations":[5,1,0.5]}'
 ETH_PRICE_LIMITS = '{}'
+REQUEST_TIMEOUT = 10000
 
 [env.production]
 workers_dev = false
@@ -52,3 +54,4 @@ BETH_RATE_LIMITS = '{}'
 BETH_PRICE_LIMITS = '{"maxDeviations":[60,30,20]}'
 STETH_RATE_LIMITS = '{"maxDeviations":[5,1,0.5]}'
 ETH_PRICE_LIMITS = '{}'
+REQUEST_TIMEOUT = 10000
